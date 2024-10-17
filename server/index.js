@@ -5,6 +5,8 @@ const port = process.env.PORT || 8080;
 const cors = require("cors");
 const database = require("./config/database");
 
+const userRoutes = require("./routes/user")
+
 // connect database
 database.connect();
 
@@ -19,6 +21,9 @@ app.get("/", (req, res) => {
         message: "Your server is up and running ...",
     });
 })
+
+// routes
+app.use("/api/v1/user", userRoutes);
 
 app.listen(port, () => {
     console.log(`app is listening to port ${port}`);
