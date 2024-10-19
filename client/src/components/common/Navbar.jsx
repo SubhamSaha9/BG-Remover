@@ -1,11 +1,40 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { assets } from "../../assets/assets";
-import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
+import { useAuth, useClerk, UserButton, useUser } from "@clerk/clerk-react";
+import { toast } from "react-hot-toast";
+import { setCredit } from "../../slices/creditSlice";
+import { useDispatch } from "react-redux";
+import axios from "axios";
+
+const baseURL = import.meta.env.VITE_BACKEND_URL;
 
 const Navbar = () => {
   const { openSignIn } = useClerk();
   const { isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const loadCreditData = async () => {
+      try {
+        const token = await getToken();
+        const { data } = axios.get(baseURL + "/user/credits", {
+          Headers: { token },
+        });
+        if (data.success) {
+          dispatch(setCredit(data.credits));
+          console.log(data);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to get credit points");
+      }
+    };
+    if (isSignedIn) {
+      loadCreditData();
+    }
+  }, [isSignedIn]);
   return (
     <div className="flex items-center justify-between mx-4 py-3 lg:mx-44">
       <Link to={"/"}>
