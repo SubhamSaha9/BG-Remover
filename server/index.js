@@ -5,7 +5,8 @@ const port = process.env.PORT || 8080;
 const cors = require("cors");
 const database = require("./config/database");
 
-const userRoutes = require("./routes/user")
+const userRoutes = require("./routes/user");
+const imageRoutes = require("./routes/image");
 
 // connect database
 database.connect();
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 
 // routes
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/image", imageRoutes);
 
 app.listen(port, () => {
     console.log(`app is listening to port ${port}`);

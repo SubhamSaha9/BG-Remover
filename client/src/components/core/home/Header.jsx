@@ -1,7 +1,62 @@
 import React from "react";
 import { assets } from "../../../assets/assets";
+import toast from "react-hot-toast";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
+import { useDispatch } from "react-redux";
+import {
+  setCredit,
+  setImage,
+  setResultImage,
+} from "../../../slices/creditSlice";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const baseURL = import.meta.env.VITE_BACKEND_URL;
 
 const Header = () => {
+  const { isSignedIn } = useUser();
+  const { openSignIn } = useClerk();
+  const { getToken } = useAuth();
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const removeBG = async (image) => {
+    try {
+      if (!isSignedIn) {
+        return openSignIn();
+      }
+
+      dispatch(setImage(false));
+      dispatch(setImage(image));
+      dispatch(setResultImage(false));
+      navigate("/result");
+
+      const token = await getToken();
+      const formData = new FormData();
+      image && formData.append("image", image);
+      const { data } = await axios.post(
+        baseURL + "/image/remove-bg",
+        formData,
+        { headers: { token } }
+      );
+
+      if (data.success) {
+        dispatch(setResultImage(data.resultImage));
+        data.creditBalance && dispatch(setCredit(data.creditBalance));
+      } else {
+        toast.error(data.message);
+        data.creditBalance && dispatch(setCredit(data.creditBalance));
+        if (data.creditBalance === 0) {
+          navigate("/price");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to remove background!");
+    }
+  };
+
   return (
     <div className="flex items-center justify-between max-sm:flex-col-reverse gap-y-10 px-4 mt-10 lg:px-44 sm:mt-20">
       {/* left side */}
@@ -20,7 +75,13 @@ const Header = () => {
           industry's standard dummy text ever.
         </p>
         <div className="">
-          <input type="file" name="" id="upload1" hidden accept="image/*" />
+          <input
+            onChange={(e) => removeBG(e.target.files[0])}
+            type="file"
+            id="upload1"
+            hidden
+            accept="image/*"
+          />
           <label
             htmlFor="upload1"
             className="inline-flex gap-3 px-8 py-3.5 rounded-full cursor-pointer bg-gradient-to-r from-violet-600 to-fuchsia-500 m-auto hover:scale-105 transition-all duration-700"
