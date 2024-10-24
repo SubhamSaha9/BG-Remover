@@ -29,3 +29,20 @@
 .bg-layer{
     background-image: url(/bg_layer.png);
 }
+
+/* Scrollbar Styling */
+*::-webkit-scrollbar {
+    width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: #dfdddd;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: #525151;
+}
